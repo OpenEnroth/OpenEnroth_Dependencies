@@ -89,11 +89,7 @@ elif [[ "$OSTYPE" = msys* ]]; then
         ADDITIONAL_CMAKE_ARGS=(
             "${ADDITIONAL_CMAKE_ARGS[@]}"
             "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug"
-        )
-    else
-        ADDITIONAL_CMAKE_ARGS=(
-            "${ADDITIONAL_CMAKE_ARGS[@]}"
-            "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded"
+            "-DCMAKE_MINIMUM_REQUIRED_VERSION=3.15"
         )
     fi 
 fi
