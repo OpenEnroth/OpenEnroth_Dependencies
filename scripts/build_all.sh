@@ -197,7 +197,7 @@ function ffmpeg_install() {
     make \
         -C "$BUILD_DIR" \
         $MAKE_ARGS_STRING \
-        install
+        install VERBOSE=1
 
     # On windows under msys we get file names is if we were on linux, and cmake find_package can't see them.
     # So we need to fix the file names. Note that .a and .lib are identical file format-wise.
