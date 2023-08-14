@@ -92,18 +92,6 @@ elif [[ "$OSTYPE" = msys* ]]; then
             -DCMAKE_C_FLAGS_DEBUG="-MTd /Z7 /Ob2 /Od"
             -DCMAKE_CXX_FLAGS_DEBUG="-MTd /Z7 /Ob2 /Od"
         )
-    else 
-        # this is where we set /MTd for ffmpeg on windows
-        ADDITIONAL_FFMPEG_ARGS=(
-            "${ADDITIONAL_FFMPEG_ARGS[@]}"
-             "--extra-cflags=\"-MT\"" 
-             "--extra-cxxflags=\"-MT\""
-        )
-        ADDITIONAL_CMAKE_ARGS=(
-            "${ADDITIONAL_CMAKE_ARGS[@]}"
-            -DCMAKE_C_FLAGS="-MT /Z7 /Ob2 /O2"
-            -DCMAKE_CXX_FLAGS="-MT /Z7 /Ob2 /O2"
-        )
     fi 
 fi
 
