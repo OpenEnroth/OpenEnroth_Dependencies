@@ -224,13 +224,6 @@ function ffmpeg_install() {
 
 git -C "$REPOS_DIR" submodule update --init
 
-ffmpeg_install \
-    "$REPOS_DIR/ffmpeg" \
-    "$BUILD_DIR/ffmpeg" \
-    "$INSTALL_DIR" \
-    "$ADDITIONAL_MAKE_ARGS_STRING" \
-    "${ADDITIONAL_FFMPEG_ARGS[@]}"
-
 # zlib builds both shared & static
 cmake_install \
     "$BUILD_TYPE" \
@@ -263,6 +256,13 @@ cmake_install \
     "-DSDL_STATIC=ON" \
     "-DSDL_SHARED=OFF" \
     "-DSDL_TEST=OFF"
+
+ffmpeg_install \
+    "$REPOS_DIR/ffmpeg" \
+    "$BUILD_DIR/ffmpeg" \
+    "$INSTALL_DIR" \
+    "$ADDITIONAL_MAKE_ARGS_STRING" \
+    "${ADDITIONAL_FFMPEG_ARGS[@]}"
 
 # We don't need docs & executables.
 rm -rf "$INSTALL_DIR/share"
