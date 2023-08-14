@@ -96,10 +96,8 @@ elif [[ "$OSTYPE" = msys* ]]; then
         # this is where we set /MTd for ffmpeg on windows
         ADDITIONAL_FFMPEG_ARGS=(
             "${ADDITIONAL_FFMPEG_ARGS[@]}"
-             "--enable-debug"
              "--extra-cflags=\"-MT\"" 
              "--extra-cxxflags=\"-MT\""
-             "--extra-ldflags=\"-nodefaultlib:LIBCMT\""
         )
         ADDITIONAL_CMAKE_ARGS=(
             "${ADDITIONAL_CMAKE_ARGS[@]}"
