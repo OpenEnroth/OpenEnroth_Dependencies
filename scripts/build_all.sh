@@ -112,7 +112,7 @@ function cmake_install() {
     ninja \
         -C "$BUILD_DIR" \
         $NINJA_ARGS_STRING \
-        install
+        install -v
 }
 
 function ffmpeg_install() {
