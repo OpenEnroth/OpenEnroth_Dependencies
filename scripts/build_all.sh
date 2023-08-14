@@ -101,8 +101,8 @@ elif [[ "$OSTYPE" = msys* ]]; then
         )
         ADDITIONAL_CMAKE_ARGS=(
             "${ADDITIONAL_CMAKE_ARGS[@]}"
-            -DCMAKE_C_FLAGS_DEBUG="-MT /Z7 /Ob2 /O2"
-            -DCMAKE_CXX_FLAGS_DEBUG="-MT /Z7 /Ob2 /O2"
+            -DCMAKE_C_FLAGS="-MT /Z7 /Ob2 /O2"
+            -DCMAKE_CXX_FLAGS="-MT /Z7 /Ob2 /O2"
         )
     fi 
 fi
