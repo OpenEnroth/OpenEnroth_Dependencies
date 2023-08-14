@@ -77,11 +77,7 @@ elif [[ "$OSTYPE" = msys* ]]; then
         "${ADDITIONAL_FFMPEG_ARGS[@]}"
         "--toolchain=msvc"
     )
-    ADDITIONAL_CMAKE_ARGS=(
-        "${ADDITIONAL_CMAKE_ARGS[@]}"
-        -DCMAKE_C_FLAGS_DEBUG="-MTd /Z7 /Ob2 /Od"
-        -DCMAKE_CXX_FLAGS_DEBUG="-MTd /Z7 /Ob2 /Od"
-    )
+
     if [[ "$BUILD_TYPE" = "Debug" ]]; then
         # this is where we set /MTd for ffmpeg on windows
         ADDITIONAL_FFMPEG_ARGS=(
@@ -90,6 +86,25 @@ elif [[ "$OSTYPE" = msys* ]]; then
              "--extra-cflags=\"-MTd\"" 
              "--extra-cxxflags=\"-MTd\""
              "--extra-ldflags=\"-nodefaultlib:LIBCMT\""
+        )
+        ADDITIONAL_CMAKE_ARGS=(
+            "${ADDITIONAL_CMAKE_ARGS[@]}"
+            -DCMAKE_C_FLAGS_DEBUG="-MTd /Z7 /Ob2 /Od"
+            -DCMAKE_CXX_FLAGS_DEBUG="-MTd /Z7 /Ob2 /Od"
+        )
+    else 
+        # this is where we set /MTd for ffmpeg on windows
+        ADDITIONAL_FFMPEG_ARGS=(
+            "${ADDITIONAL_FFMPEG_ARGS[@]}"
+             "--enable-debug"
+             "--extra-cflags=\"-MT\"" 
+             "--extra-cxxflags=\"-MT\""
+             "--extra-ldflags=\"-nodefaultlib:LIBCMT\""
+        )
+        ADDITIONAL_CMAKE_ARGS=(
+            "${ADDITIONAL_CMAKE_ARGS[@]}"
+            -DCMAKE_C_FLAGS_DEBUG="-MT /Z7 /Ob2 /O2"
+            -DCMAKE_CXX_FLAGS_DEBUG="-MT /Z7 /Ob2 /O2"
         )
     fi 
 fi
