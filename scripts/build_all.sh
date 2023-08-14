@@ -79,9 +79,8 @@ elif [[ "$OSTYPE" = msys* ]]; then
     )
     ADDITIONAL_CMAKE_ARGS=(
         "${ADDITIONAL_CMAKE_ARGS[@]}"
-        "-DCMAKE_MSVC_RUNTIME_LIBRARY=\"MultiThreaded$<$<CONFIG:Debug>:Debug>\""
-        "-DCMAKE_MINIMUM_REQUIRED_VERSION=3.15"
-        "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW"
+        "-DCMAKE_C_FLAGS_DEBUG=\"/MTd\""
+        "-DCMAKE_CXX_FLAGS_DEBUG=\"/MTd\""
     )
     if [[ "$BUILD_TYPE" = "Debug" ]]; then
         # this is where we set /MTd for ffmpeg on windows
