@@ -77,6 +77,11 @@ elif [[ "$OSTYPE" = msys* ]]; then
         "${ADDITIONAL_FFMPEG_ARGS[@]}"
         "--toolchain=msvc"
     )
+    ADDITIONAL_CMAKE_ARGS=(
+        "${ADDITIONAL_CMAKE_ARGS[@]}"
+        "-DCMAKE_MSVC_RUNTIME_LIBRARY=\"MultiThreaded$<$<CONFIG:Debug>:Debug>\""
+        "-DCMAKE_MINIMUM_REQUIRED_VERSION=3.15"
+    )
     if [[ "$BUILD_TYPE" = "Debug" ]]; then
         # this is where we set /MTd for ffmpeg on windows
         ADDITIONAL_FFMPEG_ARGS=(
@@ -85,11 +90,6 @@ elif [[ "$OSTYPE" = msys* ]]; then
              "--extra-cflags=\"-MTd\"" 
              "--extra-cxxflags=\"-MTd\""
              "--extra-ldflags=\"-nodefaultlib:LIBCMT -DEBUG\""
-        )
-        ADDITIONAL_CMAKE_ARGS=(
-            "${ADDITIONAL_CMAKE_ARGS[@]}"
-            "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug"
-            "-DCMAKE_MINIMUM_REQUIRED_VERSION=3.15"
         )
     fi 
 fi
