@@ -72,9 +72,10 @@ jobs:
         env:
           MSYS2_PATH_TYPE: inherit
         run: |
-          ./scripts/build_all.sh -j4 ${{matrix.configuration}} ${{matrix.architecture}} repos "${{env.ZIP_NAME}}"
+          ./scripts/build_all.sh -j4 windows ${{matrix.architecture}} ${{matrix.configuration}} repos "${{env.ZIP_NAME}}"
 
       - name: Print Info
+        if: always()
         shell: msys2 {0}
         env:
           MSYS2_PATH_TYPE: inherit

@@ -1,4 +1,4 @@
-name: MacOS
+name: Linux
 
 on:
   pull_request: null
@@ -20,8 +20,8 @@ env:
   DEPS_VERSION: r1
 
 jobs:
-  build_macos:
-    runs-on: macos-13
+  build_linux:
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -29,8 +29,8 @@ jobs:
           - Debug
           - Release
         architecture:
+          - x86
           - x86_64
-          - arm64
     steps:
       - name: Inject Short Variables
         uses: rlespinasse/github-slug-action@v4
@@ -43,16 +43,22 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          brew install yasm
-          brew install ninja
+          sudo apt-get install -y yasm
+          sudo apt-get install -y ninja-build
+          
+          if [[ "${{matrix.architecture}}" = "x86" ]]; then
+              sudo dpkg --add-architecture i386
+              sudo apt-get update
+              sudo apt-get install -y gcc-multilib g++-multilib
+          fi
 
       - name: Variables
         run: |
-          echo "ZIP_NAME=darwin_${{matrix.configuration}}_${{matrix.architecture}}.zip" >> $GITHUB_ENV
+          echo "ZIP_NAME=linux_${{matrix.configuration}}_${{matrix.architecture}}.zip" >> $GITHUB_ENV
 
       - name: Build
         run: |
-          ./scripts/build_all.sh -j4 darwin ${{matrix.architecture}} ${{matrix.configuration}} repos "${{env.ZIP_NAME}}"
+          ./scripts/build_all.sh -j4 linux ${{matrix.architecture}} ${{matrix.configuration}} repos "${{env.ZIP_NAME}}"
 
       - name: Print Info
         if: always()
