@@ -91,11 +91,11 @@ elif [[ "$BUILD_PLATFORM" = "windows" ]]; then
         )
         ADDITIONAL_CMAKE_ARGS=(
             "${ADDITIONAL_CMAKE_ARGS[@]}"
-            -DCMAKE_C_FLAGS_DEBUG="-MTd /Z7 /Ob2 /Od"
-            -DCMAKE_CXX_FLAGS_DEBUG="-MTd /Z7 /Ob2 /Od"
+            -DCMAKE_C_FLAGS_DEBUG="-MTd -Z7 -Ob2 -Od"
+            -DCMAKE_CXX_FLAGS_DEBUG="-MTd -Z7 -Ob2 -Od"
         )
     else 
-        # this is where we set /MTd for ffmpeg on windows
+        # this is where we set /MT for ffmpeg on windows
         ADDITIONAL_FFMPEG_ARGS=(
             "${ADDITIONAL_FFMPEG_ARGS[@]}"
              "--extra-cflags=\"-MT\"" 
@@ -103,11 +103,10 @@ elif [[ "$BUILD_PLATFORM" = "windows" ]]; then
         )
         ADDITIONAL_CMAKE_ARGS=(
             "${ADDITIONAL_CMAKE_ARGS[@]}"
-            -DCMAKE_C_FLAGS_RELEASE="/Z7 /MT /O2 /Ob2"
-            -DCMAKE_CXX_FLAGS_RELEASE="/Z7 /MT /O2 /Ob2"
+            -DCMAKE_C_FLAGS_RELEASE="-Z7 -MT -O2 -Ob2"
+            -DCMAKE_CXX_FLAGS_RELEASE="-Z7 -MT -O2 -Ob2"
         )        
-    fi 
-
+    fi
 elif [[ "$BUILD_PLATFORM" = "linux" ]]; then
     if [[ "$BUILD_ARCH" = "x86" ]]; then
         ADDITIONAL_CMAKE_ARGS=(
@@ -123,8 +122,6 @@ elif [[ "$BUILD_PLATFORM" = "linux" ]]; then
         )
     fi
 fi
-
-
 
 function cmake_install() {
     local BUILD_TYPE="$1"
@@ -231,7 +228,7 @@ function ffmpeg_install() {
     make \
         -C "$BUILD_DIR" \
         $MAKE_ARGS_STRING \
-        install VERBOSE=1
+        install V=1
 
     # On windows under msys we get file names is if we were on linux, and cmake find_package can't see them.
     # So we need to fix the file names. Note that .a and .lib are identical file format-wise.
@@ -253,6 +250,13 @@ function ffmpeg_install() {
 }
 
 git -C "$REPOS_DIR" submodule update --init
+
+ffmpeg_install \
+    "$REPOS_DIR/ffmpeg" \
+    "$BUILD_DIR/ffmpeg" \
+    "$INSTALL_DIR" \
+    "$ADDITIONAL_MAKE_ARGS_STRING" \
+    "${ADDITIONAL_FFMPEG_ARGS[@]}"
 
 # zlib builds both shared & static
 cmake_install \
@@ -289,13 +293,6 @@ if [[ "$BUILD_PLATFORM" != "linux" ]]; then
         "-DSDL_SHARED=OFF" \
         "-DSDL_TEST=OFF"
 fi
-
-ffmpeg_install \
-    "$REPOS_DIR/ffmpeg" \
-    "$BUILD_DIR/ffmpeg" \
-    "$INSTALL_DIR" \
-    "$ADDITIONAL_MAKE_ARGS_STRING" \
-    "${ADDITIONAL_FFMPEG_ARGS[@]}"
 
 # We don't need docs & executables.
 rm -rf "$INSTALL_DIR/share"
