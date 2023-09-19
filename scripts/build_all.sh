@@ -113,6 +113,12 @@ elif [[ "$BUILD_PLATFORM" == "linux" ]]; then
             "--extra-cflags=-m32"
             "--extra-ldflags=-m32"
         )
+
+        # Unfortunately we need to add --disable-asm for a static x86 binary, see:
+        # https://stackoverflow.com/questions/13812185/how-to-recompile-with-fpic
+        ADDITIONAL_FFMPEG_ARGS+=(
+            "--disable-asm"
+        )
     fi
 elif [[ "$BUILD_PLATFORM" == "android" ]]; then
     if [[ "$BUILD_ARCH" == "arm32" ]]; then
