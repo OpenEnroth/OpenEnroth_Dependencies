@@ -260,7 +260,6 @@ function ffmpeg_install() {
         "--enable-avutil" \
         "--enable-swresample" \
         "--enable-swscale" \
-        "--enable-mdct" \
         "--enable-rdft" \
         "--enable-fft" \
         "--disable-devices" \
