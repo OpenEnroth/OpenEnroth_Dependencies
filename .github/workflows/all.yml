@@ -145,6 +145,7 @@ jobs:
           ./scripts/print_info.sh
 
       - name: 'Publish release'
+        # Dont try to publish for PR's
         if: github.event_name != 'pull_request'
         uses: softprops/action-gh-release@v1
         with:
