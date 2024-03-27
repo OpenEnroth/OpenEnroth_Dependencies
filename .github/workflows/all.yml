@@ -43,7 +43,7 @@ jobs:
         include:
           - {target: windows_x86,       platform: windows,  architecture: x86,        os: windows-2022, shell: 'msys2 {0}'}
           - {target: windows_x86_64,    platform: windows,  architecture: x86_64,     os: windows-2022, shell: 'msys2 {0}'}
-          - {target: darwin_arm64,      platform: darwin,   architecture: arm64,      os: macos-14-arm64,     shell: bash}
+          - {target: darwin_arm64,      platform: darwin,   architecture: arm64,      os: macos-14,     shell: bash}
           - {target: darwin_x86_64,     platform: darwin,   architecture: x86_64,     os: macos-14,     shell: bash}
           - {target: linux_x86,         platform: linux,    architecture: x86,        os: ubuntu-22.04, shell: bash}
           - {target: linux_x86_64,      platform: linux,    architecture: x86_64,     os: ubuntu-22.04, shell: bash}
