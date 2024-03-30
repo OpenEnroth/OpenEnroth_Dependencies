@@ -145,11 +145,14 @@ jobs:
           ./scripts/print_info.sh
 
       - name: 'Publish release'
-        # Dont try to publish for PR's
-        if: github.event_name != 'pull_request'
+        id: release
+        continue-on-error: true
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
           tag_name: 'deps_${{env.DEPS_VERSION}}_${{env.GITHUB_REF_NAME_SLUG}}'
           files: '${{env.ZIP_NAME}}'
 
+      #show success if release published failed on pr
+      - run: echo "OK"
+        if: job.steps.release.status == failure() && github.event_name == 'pull_request'
