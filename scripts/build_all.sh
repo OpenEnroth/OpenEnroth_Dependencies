@@ -380,7 +380,8 @@ if [[ "$BUILD_PLATFORM" == "linux" ]]; then
         "$ADDITIONAL_THREADS_ARG_STRING" \
         "${ADDITIONAL_CMAKE_ARGS[@]}" \
         "-DBUILD_DWARFDUMP=OFF" \
-        "-DPIC_ALWAYS=ON"
+        "-DPIC_ALWAYS=ON" \
+        "-DENABLE_DECOMPRESSION=OFF" # We don't generate compressed dwarf sections, so this is not needed.
 fi
 
 # We don't need docs & executables.
