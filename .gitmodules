@@ -10,3 +10,6 @@
 [submodule "repos/ffmpeg"]
 	path = repos/ffmpeg
 	url = https://github.com/FFmpeg/FFmpeg
+[submodule "repos/libdwarf"]
+	path = repos/libdwarf
+	url = https://github.com/davea42/libdwarf-code.git

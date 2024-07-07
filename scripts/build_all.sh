@@ -368,6 +368,21 @@ if [[ "$BUILD_PLATFORM" != "linux" ]]; then
         "-DSDL_TEST=OFF"
 fi
 
+if [[ "$BUILD_PLATFORM" == "linux" ]]; then
+    # Pre-building libdwarf is only relevant on linux. We are doing this because libdwarf differs between different
+    # distros, and when linking dynamically with libdwarf in Ubuntu we end up with an OpenEnroth binary that doesn't
+    # work anywhere else.
+    cmake_install \
+        "$BUILD_TYPE" \
+        "$REPOS_DIR/libdwarf" \
+        "$BUILD_DIR/libdwarf" \
+        "$INSTALL_DIR" \
+        "$ADDITIONAL_THREADS_ARG_STRING" \
+        "${ADDITIONAL_CMAKE_ARGS[@]}" \
+        "-DBUILD_DWARFDUMP=OFF" \
+        "-DPIC_ALWAYS=ON"
+fi
+
 # We don't need docs & executables.
 rm -rf "$INSTALL_DIR/share"
 rm -rf "$INSTALL_DIR/bin"
