@@ -378,10 +378,7 @@ if [[ "$BUILD_PLATFORM" == "linux" ]]; then
         "$BUILD_DIR/libdwarf" \
         "$INSTALL_DIR" \
         "$ADDITIONAL_THREADS_ARG_STRING" \
-        "${ADDITIONAL_CMAKE_ARGS[@]}" \
-        "-DBUILD_DWARFDUMP=OFF" \
-        "-DPIC_ALWAYS=ON" \
-        "-DENABLE_DECOMPRESSION=OFF" # We don't generate compressed dwarf sections, so this is not needed.
+        "${ADDITIONAL_CMAKE_ARGS[@]}"
 fi
 
 # We don't need docs & executables.
