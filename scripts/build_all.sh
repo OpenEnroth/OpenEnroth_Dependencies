@@ -58,7 +58,10 @@ rm -f "$TARGET_ZIP"
 
 # Figure out additional args.
 ADDITIONAL_THREADS_ARG_STRING="$THREADS_ARG"
-ADDITIONAL_CMAKE_ARGS=()
+ADDITIONAL_CMAKE_ARGS=(
+    "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW" # Enable CMAKE_MSVC_RUNTIME_LIBRARY.
+    "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded$<$<CONFIG:Debug>:Debug>"
+)
 ADDITIONAL_FFMPEG_ARGS=(
     "--arch=$BUILD_ARCH"
 )
@@ -101,8 +104,8 @@ elif [[ "$BUILD_PLATFORM" == "windows" ]]; then
              "--extra-ldflags=-nodefaultlib:LIBCMT"
         )
         ADDITIONAL_CMAKE_ARGS+=(
-            "-DCMAKE_C_FLAGS_DEBUG=-MTd -Z7 -Ob2 -Od"
-            "-DCMAKE_CXX_FLAGS_DEBUG=-MTd -Z7 -Ob2 -Od"
+            "-DCMAKE_C_FLAGS_DEBUG=-Z7 -Ob2 -Od"
+            "-DCMAKE_CXX_FLAGS_DEBUG=-Z7 -Ob2 -Od"
         )
     else 
         # this is where we set /MT for ffmpeg on windows
@@ -110,10 +113,10 @@ elif [[ "$BUILD_PLATFORM" == "windows" ]]; then
              "--extra-cflags=-MT"
         )
         ADDITIONAL_CMAKE_ARGS+=(
-            "-DCMAKE_C_FLAGS_RELEASE=-Z7 -MT -O2 -Ob2"
-            "-DCMAKE_CXX_FLAGS_RELEASE=-Z7 -MT -O2 -Ob2"
-            "-DCMAKE_C_FLAGS_RELWITHDEBINFO=-Z7 -MT -O2 -Ob2"
-            "-DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-Z7 -MT -O2 -Ob2"
+            "-DCMAKE_C_FLAGS_RELEASE=-Z7 -O2 -Ob2"
+            "-DCMAKE_CXX_FLAGS_RELEASE=-Z7 -O2 -Ob2"
+            "-DCMAKE_C_FLAGS_RELWITHDEBINFO=-Z7 -O2 -Ob2"
+            "-DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-Z7 -O2 -Ob2"
         )
     fi
 elif [[ "$BUILD_PLATFORM" == "linux" ]]; then
@@ -203,6 +206,39 @@ function replace_in_file() {
     mv "$FILE_PATH.fixed" "$FILE_PATH"
 }
 
+MERGE_CMAKE_ARGS_ARRAY=()
+function marge_cmake_args() {
+    local prefix="$1"
+    local -a in out
+    in=("${MERGE_CMAKE_ARGS_ARRAY[@]}")
+
+    local a name base val
+    local merged_val=""
+    local seen=0
+
+    for a in "${in[@]}"; do
+        if [[ $a == -D*=* ]]; then
+            name=${a#-D}                 # e.g., CMAKE_C_FLAGS=...  (or CMAKE_C_FLAGS:STRING=...)
+            base=${name%%=*}             # the part before '='
+            val=${name#*=}               # the part after '=' (may be empty)
+
+            if [[ $base == "$prefix" ]]; then
+                seen=1
+                if [[ -n $val ]]; then
+                    [[ -n $merged_val ]] && merged_val+=" "
+                    merged_val+="$val"
+                fi
+                continue
+            fi
+        fi
+        out+=("$a")
+    done
+
+    (( seen )) && out+=("-D${prefix}=${merged_val}")
+
+    MERGE_CMAKE_ARGS_ARRAY=("${out[@]}")
+}
+
 function cmake_install() {
     local BUILD_TYPE="$1"
     local SOURCE_DIR="$2"
@@ -211,12 +247,16 @@ function cmake_install() {
     local THREADS_ARG_STRING="$5"
     shift 5 # The rest are cmake args
 
+    MERGE_CMAKE_ARGS_ARRAY=("$@")
+    marge_cmake_args CMAKE_C_FLAGS
+    marge_cmake_args CMAKE_CXX_FLAGS
+
     cmake \
         -S "$SOURCE_DIR" \
         -B "$BUILD_DIR" \
         "-DCMAKE_BUILD_TYPE=$BUILD_TYPE" \
         "-DCMAKE_INSTALL_PREFIX=$INSTALL_DIR" \
-        "$@"
+        "${MERGE_CMAKE_ARGS_ARRAY[@]}"
 
     # $THREADS_ARG_STRING will glob, this is intentional.
     cmake \
@@ -270,6 +310,7 @@ function ffmpeg_install() {
         "--disable-filters" \
         "--disable-hwaccels" \
         "--disable-decoders" \
+        "--disable-libdrm" \
         "--enable-decoder=mp3*" \
         "--enable-decoder=adpcm*" \
         "--enable-decoder=pcm*" \
@@ -337,6 +378,9 @@ ffmpeg_install \
 
 if [[ "$BUILD_PLATFORM" != "android" ]]; then
     # zlib builds both shared & static.
+    #
+    # Need to pass CMAKE_POLICY_VERSION_MINIMUM so that it builds on MacOS with cmake 4.0.
+    # And need to pass -Dfdopen=fdopen to work around an issue with zlib failing to compile with AppleClang 18.
     cmake_install \
         "$BUILD_TYPE" \
         "$REPOS_DIR/zlib" \
@@ -344,6 +388,9 @@ if [[ "$BUILD_PLATFORM" != "android" ]]; then
         "$INSTALL_DIR" \
         "$ADDITIONAL_THREADS_ARG_STRING" \
         "${ADDITIONAL_CMAKE_ARGS[@]}" \
+        "-DCMAKE_POLICY_VERSION_MINIMUM=3.5" \
+        "-DCMAKE_C_FLAGS=-Dfdopen=fdopen" \
+        "-DCMAKE_CXX_FLAGS=-Dfdopen=fdopen" \
         "-DCMAKE_DEBUG_POSTFIX=d" # This is needed for non-config find_package to work.
 fi
 
@@ -373,32 +420,31 @@ cmake_install \
     "-DZLIB_ROOT=$INSTALL_DIR" \
     "-DZLIB_USE_STATIC_LIBS=ON"
 
-if [[ "$BUILD_PLATFORM" != "linux" ]]; then
-    # Pre-building SDL on linux makes very little sense. Do we enable x11? Wayland? Something else?
-    cmake_install \
-        "$BUILD_TYPE" \
-        "$REPOS_DIR/sdl" \
-        "$BUILD_DIR/sdl" \
-        "$INSTALL_DIR" \
-        "$ADDITIONAL_THREADS_ARG_STRING" \
-        "${ADDITIONAL_CMAKE_ARGS[@]}" \
-        "-DSDL_FORCE_STATIC_VCRT=ON" \
-        "-DSDL_STATIC=$SDL_BUILD_STATIC" \
-        "-DSDL_SHARED=$SDL_BUILD_SHARED" \
-        "-DSDL_TEST=OFF"
-fi
+cmake_install \
+    "$BUILD_TYPE" \
+    "$REPOS_DIR/sdl" \
+    "$BUILD_DIR/sdl" \
+    "$INSTALL_DIR" \
+    "$ADDITIONAL_THREADS_ARG_STRING" \
+    "${ADDITIONAL_CMAKE_ARGS[@]}" \
+    "-DSDL_STATIC=$SDL_BUILD_STATIC" \
+    "-DSDL_SHARED=$SDL_BUILD_SHARED" \
+    "-DSDL_TEST_LIBRARY=OFF"
 
-# We don't need docs & executables.
-rm -rf "$INSTALL_DIR/share"
+# We don't need executables.
 rm -rf "$INSTALL_DIR/bin"
+
+# We don't need docs & everything else from /share.
+# But we need to keep /share/java with SDL3*.jar.
+find "$INSTALL_DIR/share" -mindepth 1 -maxdepth 1 -not -regex ".*share/java.*" -exec rm "-r" "{}" ";"
 
 # We don't need dynamic zlib. Can't use proper regular expressions here b/c we need this to be portable.
 # See https://stackoverflow.com/questions/39727621/a-regex-that-works-in-find.
 # Note that on Windows dlls are in /bin and we've already deleted them.
-find ./tmp/install "(" -regex "libz.*dylib" -or -regex "libz.*so" ")" -exec rm "{}" ";"
+find $INSTALL_DIR "(" -regex ".*libz.*dylib" -or -regex ".*libz.*so" ")" -exec rm "{}" ";"
 
 # And we also don't need all the symlinks.
-find ./tmp/install -type l -exec rm "{}" ";"
+find $INSTALL_DIR -type l -exec rm "{}" ";"
 
 # We don't want unneeded path in the zip archive, and there is no other way to do it except with pushd/popd:
 # https://superuser.com/questions/119649/avoid-unwanted-path-in-zip-file/119661
