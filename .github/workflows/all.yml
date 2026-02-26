@@ -37,6 +37,7 @@ jobs:
           - darwin_x86_64
           - linux_x86
           - linux_x86_64
+          - linux_arm64
           - android_x86
           - android_x86_64
           - android_arm32
@@ -48,6 +49,7 @@ jobs:
           - {target: darwin_x86_64,     platform: darwin,   architecture: x86_64,     os: macos-14,     shell: bash}
           - {target: linux_x86,         platform: linux,    architecture: x86,        os: ubuntu-22.04, shell: bash}
           - {target: linux_x86_64,      platform: linux,    architecture: x86_64,     os: ubuntu-22.04, shell: bash}
+          - {target: linux_arm64,       platform: linux,    architecture: arm64,      os: ubuntu-24.04-arm, shell: bash}
           - {target: android_x86,       platform: android,  architecture: x86,        os: ubuntu-22.04, shell: bash}
           - {target: android_x86_64,    platform: android,  architecture: x86_64,     os: ubuntu-22.04, shell: bash}
           - {target: android_arm32,     platform: android,  architecture: arm32,      os: ubuntu-22.04, shell: bash}
