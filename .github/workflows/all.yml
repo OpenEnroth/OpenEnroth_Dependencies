@@ -17,7 +17,7 @@ on:
       - published
 
 env:
-  DEPS_VERSION: r7
+  DEPS_VERSION: r8
   # NDK version should match with the one in the main repo!
   NDK_VERSION: 28.1.13356709
 

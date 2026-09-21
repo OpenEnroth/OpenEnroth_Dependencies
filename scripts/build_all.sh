@@ -377,20 +377,18 @@ ffmpeg_install \
     "${ADDITIONAL_FFMPEG_ARGS[@]}"
 
 if [[ "$BUILD_PLATFORM" != "android" ]]; then
-    # zlib builds both shared & static.
-    #
-    # Need to pass CMAKE_POLICY_VERSION_MINIMUM so that it builds on MacOS with cmake 4.0.
-    # And need to pass -Dfdopen=fdopen to work around an issue with zlib failing to compile with AppleClang 18.
+    # zlib-ng builds both shared & static. ZLIB_COMPAT makes it install as zlib.h and libz, so that everything that
+    # links zlib gets zlib-ng instead, libpng and ffmpeg included.
     cmake_install \
         "$BUILD_TYPE" \
-        "$REPOS_DIR/zlib" \
-        "$BUILD_DIR/zlib" \
+        "$REPOS_DIR/zlib_ng" \
+        "$BUILD_DIR/zlib_ng" \
         "$INSTALL_DIR" \
         "$ADDITIONAL_THREADS_ARG_STRING" \
         "${ADDITIONAL_CMAKE_ARGS[@]}" \
-        "-DCMAKE_POLICY_VERSION_MINIMUM=3.5" \
-        "-DCMAKE_C_FLAGS=-Dfdopen=fdopen" \
-        "-DCMAKE_CXX_FLAGS=-Dfdopen=fdopen" \
+        "-DZLIB_COMPAT=ON" \
+        "-DZLIB_ENABLE_TESTS=OFF" \
+        "-DWITH_GTEST=OFF" \
         "-DCMAKE_DEBUG_POSTFIX=d" # This is needed for non-config find_package to work.
 fi
 
