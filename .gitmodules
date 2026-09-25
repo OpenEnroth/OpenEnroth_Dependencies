@@ -1,9 +1,6 @@
 [submodule "repos/openal_soft"]
 	path = repos/openal_soft
 	url = https://github.com/kcat/openal-soft
-[submodule "repos/zlib"]
-	path = repos/zlib
-	url = https://github.com/madler/zlib
 [submodule "repos/sdl"]
 	path = repos/sdl
 	url = https://github.com/libsdl-org/SDL
@@ -13,3 +10,6 @@
 [submodule "repos/libpng"]
 	path = repos/libpng
 	url = https://github.com/pnggroup/libpng.git
+[submodule "repos/zlib_ng"]
+	path = repos/zlib_ng
+	url = https://github.com/zlib-ng/zlib-ng
