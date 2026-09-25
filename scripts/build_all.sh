@@ -377,8 +377,9 @@ ffmpeg_install \
     "${ADDITIONAL_FFMPEG_ARGS[@]}"
 
 if [[ "$BUILD_PLATFORM" != "android" ]]; then
-    # zlib-ng builds both shared & static. ZLIB_COMPAT makes it install as zlib.h and libz, so that everything that
-    # links zlib gets zlib-ng instead, libpng and ffmpeg included.
+    # ZLIB_COMPAT makes zlib-ng install as zlib.h and libz, so that everything that links zlib gets zlib-ng instead,
+    # libpng and ffmpeg included. BUILD_TESTING also drags in a googletest clone, and the SIMD options we want are
+    # on by default, dispatched at runtime.
     cmake_install \
         "$BUILD_TYPE" \
         "$REPOS_DIR/zlib_ng" \
@@ -387,8 +388,8 @@ if [[ "$BUILD_PLATFORM" != "android" ]]; then
         "$ADDITIONAL_THREADS_ARG_STRING" \
         "${ADDITIONAL_CMAKE_ARGS[@]}" \
         "-DZLIB_COMPAT=ON" \
-        "-DZLIB_ENABLE_TESTS=OFF" \
-        "-DWITH_GTEST=OFF" \
+        "-DBUILD_TESTING=OFF" \
+        "-DBUILD_SHARED_LIBS=OFF" \
         "-DCMAKE_DEBUG_POSTFIX=d" # This is needed for non-config find_package to work.
 fi
 
@@ -436,12 +437,7 @@ rm -rf "$INSTALL_DIR/bin"
 # But we need to keep /share/java with SDL3*.jar.
 find "$INSTALL_DIR/share" -mindepth 1 -maxdepth 1 -not -regex ".*share/java.*" -exec rm "-r" "{}" ";"
 
-# We don't need dynamic zlib. Can't use proper regular expressions here b/c we need this to be portable.
-# See https://stackoverflow.com/questions/39727621/a-regex-that-works-in-find.
-# Note that on Windows dlls are in /bin and we've already deleted them.
-find $INSTALL_DIR "(" -regex ".*libz.*dylib" -or -regex ".*libz.*so" ")" -exec rm "{}" ";"
-
-# And we also don't need all the symlinks.
+# We don't need all the symlinks.
 find $INSTALL_DIR -type l -exec rm "{}" ";"
 
 # We don't want unneeded path in the zip archive, and there is no other way to do it except with pushd/popd:
